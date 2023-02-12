@@ -1,7 +1,6 @@
 import pytest
 
-from code import main
-
+import delivery_price
 
 @pytest.mark.parametrize('distance,result', [
     ((), -1),
@@ -22,7 +21,7 @@ from code import main
     (500, 300),
 ])
 def test_get_distance_surcharge(distance, result):
-    assert main.get_distance_surcharge(distance) == result
+    assert delivery_price.get_distance_surcharge(distance) == result
 
 
 @pytest.mark.parametrize('length, width, height, result', [
@@ -52,7 +51,7 @@ def test_get_distance_surcharge(distance, result):
     (500, 500, 500, 200),
 ])
 def test_get_cargo_size_surcharge(length, width, height, result):
-    assert main.get_cargo_size_surcharge(length, width, height) == result
+    assert delivery_price.get_cargo_size_surcharge(length, width, height) == result
 
 
 @pytest.mark.parametrize('is_fragile, result', [
@@ -66,7 +65,7 @@ def test_get_cargo_size_surcharge(length, width, height, result):
     ([], -1),
 ])
 def test_get_fragility_of_cargo_surcharge(is_fragile, result):
-    assert main.get_fragility_of_cargo_surcharge(is_fragile) == result
+    assert delivery_price.get_fragility_of_cargo_surcharge(is_fragile) == result
 
 
 @pytest.mark.parametrize('workload, result', [
@@ -82,7 +81,7 @@ def test_get_fragility_of_cargo_surcharge(is_fragile, result):
     ([], -1),
 ])
 def test_get_workload_surcharge(workload, result):
-    assert main.get_workload_surcharge(workload) == result
+    assert delivery_price.get_workload_surcharge(workload) == result
 
 
 @pytest.mark.parametrize('distance,	length,	width, height, is_fragile, workload, result', [
@@ -110,4 +109,4 @@ def test_get_workload_surcharge(workload, result):
     [1, 49, 50, 49, True, 'very_high', 630],
 ])
 def test_get_delivery_price(distance, length, width, height, is_fragile, workload, result):
-    assert main.get_delivery_price(distance, length, width, height, is_fragile, workload) == result
+    assert delivery_price.get_delivery_price(distance, length, width, height, is_fragile, workload) == result
