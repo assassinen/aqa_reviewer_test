@@ -1,0 +1,7 @@
+name: Check
+on: [push]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pytest tests/
