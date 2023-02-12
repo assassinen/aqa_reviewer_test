@@ -7,7 +7,10 @@ def get_distance_surcharge(distance):
     - до 10 км: +100 рублей к доставке;
     - до 2 км: +50 рублей к доставке;
     """
-    if distance < 2:
+    if not (isinstance(distance, int) or isinstance(distance, float)):
+        return -1
+
+    if distance > 0 and distance < 2:
         return 50
     elif distance >= 2 and distance < 10:
         return 100
@@ -15,21 +18,32 @@ def get_distance_surcharge(distance):
         return 200
     elif distance >= 30:
         return 300
+    else:
+        return -1
 
 
-def get_cargo_size_surcharge(big_size):
+def get_cargo_size_surcharge(length, width, height):
     """
     *габаритов груза:*
-    - большие габариты: +200 рублей к доставке;
-    - маленькие габариты: +100 рублей к доставке;
+
+    - большие габариты (>= 150 см в сумме трёх измерений): +200 рублей к доставке;
+    - маленькие габариты (< 150 см в сумме трёх измерений): +100 рублей к доставке;
     """
-    return 200 if big_size else 100
+    if not (isinstance(length, int) and isinstance(width, int) and isinstance(height, int)) \
+            or length <= 0 or width <= 0 or height <= 0:
+        return -1
+
+    is_big_size = sum((length, width, height)) >= 150
+    return 200 if is_big_size else 100
 
 
 def get_fragility_of_cargo_surcharge(is_fragile):
     """
     Если груз хрупкий — +300 рублей к доставке
     """
+    if not isinstance(is_fragile, bool):
+        return -1
+
     return 300 if is_fragile else 0
 
 
@@ -41,6 +55,9 @@ def get_workload_surcharge(workload='normal'):
     - повышенная загруженность — 1.2;
     - во всех остальных случаях коэффициент равен 1.
     """
+    if not isinstance(workload, str):
+        return -1
+
     workloads = {'normal': 1,
                  'high': 1.2,
                  'very_high': 1.4,
@@ -50,22 +67,20 @@ def get_workload_surcharge(workload='normal'):
     return workloads[workload]
 
 
-def is_possibility_delivery(distance, is_big_size, is_fragile, workload):
+def is_possibility_delivery(distance, is_fragile):
     """
     проверяем тип входных параметров и то, что xрупкие грузы нельзя возить на расстояние более 30 км;
     """
-    return isinstance(is_big_size, bool) \
-           and isinstance(is_fragile, bool) \
-           and isinstance(workload, str) \
-           and (isinstance(distance, float) or isinstance(distance, int))\
-           and not(is_fragile and distance > 30)
+    return not(is_fragile and distance > 30)
 
 
-def get_delivery_price(distance, is_big_size, is_fragile, workload):
+def get_delivery_price(distance, length, width, height, is_fragile, workload):
     """
 
     :param distance: float or int
-    :param is_big_size: bool
+    :param length: int
+    :param width: int
+    :param height: int
     :param is_fragile: bool
     :param workload: str -> [normal, high, very_high, extra_high]
     :return: delivery_price: float
@@ -73,17 +88,18 @@ def get_delivery_price(distance, is_big_size, is_fragile, workload):
     min_price = 400
     price = 0
 
-    if is_possibility_delivery(distance, is_big_size, is_fragile, workload):
-        price += get_distance_surcharge(distance)
-        price += get_cargo_size_surcharge(is_big_size)
-        price += get_fragility_of_cargo_surcharge(is_fragile)
+    distance_surcharge = get_distance_surcharge(distance)
+    cargo_size_surcharge = get_cargo_size_surcharge(length, width, height)
+    fragility_of_cargo_surcharg = get_fragility_of_cargo_surcharge(is_fragile)
+    workload_surcharg = get_workload_surcharge(workload)
+
+    if is_possibility_delivery(distance, is_fragile) \
+            and distance_surcharge != -1 \
+            and cargo_size_surcharge != -1 \
+            and fragility_of_cargo_surcharg != -1 \
+            and workload_surcharg != -1:
+        price += sum((distance_surcharge, cargo_size_surcharge, fragility_of_cargo_surcharg))
         price *= get_workload_surcharge(workload)
-        return max(price, min_price)
+        return max(round(price, 2), min_price)
     else:
         return -1
-
-print(get_delivery_price(distance=31,
-                         is_big_size=True,
-                         is_fragile=True,
-                         workload='very_high')
-      )
