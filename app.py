@@ -1,4 +1,6 @@
 import sqlite3
+import random
+import string
 from flask import Flask, jsonify
 
 
@@ -28,6 +30,13 @@ def save_reguest():
     cur.commit()
     cur.close()
     return jsonify({'result': True}), 200
+
+
+@app.route('/get_random_str/')
+def get_random_str():
+    letters = string.ascii_lowercase
+    random_str = ''.join(random.choice(letters) for i in range(10))
+    return random_str, 200
 
 
 @app.route('/')
